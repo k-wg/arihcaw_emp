@@ -1,0 +1,152 @@
+//@version=6
+indicator('RSI_Top_Bottom', max_bars_back = 500)
+
+// =============================
+// Inputs (from section.txt)
+// =============================
+len = input.int(14, minval = 1, title = 'RSI Length')
+src = input(close, 'RSI Source')
+ob = input(defval = 65, title = 'Upper Band')
+os = input(defval = 35, title = 'Lower Band')
+prd = input(defval = 10, title = 'Max Number of Bars in OB/OS')
+mindis = input(defval = 5, title = 'Min Number of Bars between Tops/Bottoms')
+maxdis = input(defval = 100, title = 'Max Number of Bars between Tops/Bottoms')
+topcol = input.color(defval = color.red, title = 'Line Colors', inline = 'cols')
+bottomcol = input.color(defval = color.lime, title = '', inline = 'cols')
+lwidth = input.int(defval = 2, title = 'Line Width', minval = 1, maxval = 4)
+chbarcol = input(defval = true, title = 'Change Bar Color')
+showExtraLines = input.bool(defval = true, title = 'Show Extra Lines', group = 'Extra Lines')
+line25 = input.int(defval = 25, title = 'Line 25 Level', group = 'Extra Lines')
+line26 = input.int(defval = 25, title = 'Line 25 Level', group = 'Extra Lines')
+line36 = input.int(defval = 35, title = 'Line 35 Level', group = 'Extra Lines')
+line66 = input.int(defval = 65, title = 'Line 65 Level', group = 'Extra Lines')
+line75 = input.int(defval = 75, title = 'Line 75 Level', group = 'Extra Lines')
+line76 = input.int(defval = 75, title = 'Line 75 Level', group = 'Extra Lines')
+
+
+// =============================
+// SIGNAL TRACKING SYSTEM
+// =============================
+var string lastSignalType = ""
+
+// =============================
+// Calculations
+// =============================
+rsi = ta.rsi(src, len)
+rsi_ma50 = ta.sma(rsi, 50)
+
+// =============================
+// Restored Original Hlines (from short_term.txt)
+// =============================
+// Plot RSI and bands
+plot(rsi, 'RSI', color = color.rgb(0, 15, 182, 33))
+plot(rsi_ma50, 'RSI MA50', color = color.rgb(255, 255, 255))
+band1 = hline(ob, 'Upper Band', color = #ffffff, linestyle = hline.style_dotted, linewidth = 2)
+band0 = hline(os, 'Lower Band', color = #ffffff, linestyle = hline.style_dotted, linewidth = 2)
+band50 = hline(50, 'Middle Line', color = #ffffff, linestyle = hline.style_dotted, linewidth = 2)
+
+// Extra lines
+line25_plot = hline(showExtraLines ? line25 : na, 'Line 25', color = #ffffff, linestyle = hline.style_dotted, linewidth = 2)
+line26_plot = hline(showExtraLines ? line26 : na, 'Line 25 shadow', color = #f7525f, linestyle = hline.style_dashed, linewidth = 2)
+line36_plot = hline(showExtraLines ? line36 : na, 'Line 35 shadow', color = #66bb6a, linestyle = hline.style_dashed, linewidth = 2)
+line66_plot = hline(showExtraLines ? line66 : na, 'Line 65 shadow', color = #ba68c8, linestyle = hline.style_dashed, linewidth = 2)
+line75_plot = hline(showExtraLines ? line75 : na, 'Line 75', color = #ffffff, linestyle = hline.style_dotted, linewidth = 2)
+line76_plot = hline(showExtraLines ? line76 : na, 'Line 75 shadow', color = #ff9800, linestyle = hline.style_dashed, linewidth = 2)
+
+fill(band1, band0, color = color.new(#9a15ff, 97), title = 'Background')
+
+// // =============================
+// // Moving Averages (from section.txt)
+// // =============================
+// short002 = ta.sma(close, 2) 
+// short007 = ta.sma(close, 7) 
+// short21 = ta.sma(close, 14)
+// short50 = ta.sma(close, 50)
+// long100 = ta.sma(close, 100)
+// long200 = ta.sma(close, 200)
+// long350 = ta.sma(close, 350)
+// long500 = ta.sma(close, 500)
+
+// // =============================
+// // Fibonacci Levels (from section.txt)
+// // =============================
+// fiblength = input(1000)
+// maxr = ta.highest(close, fiblength)
+// minr = ta.lowest(close, fiblength)
+// ranr = maxr - minr
+
+// level_100 = maxr
+// level_764 = maxr - 0.236 * ranr
+// level_618 = maxr - 0.382 * ranr
+// level_500 = maxr - 0.50 * ranr
+// level_382 = minr + 0.382 * ranr
+// level_236 = minr + 0.236 * ranr
+// level_000 = minr
+
+                                    // =============================
+                                    // Signal Conditions 
+                                    // =============================
+
+
+// =============================
+// Original Divergence Logic
+// =============================
+var bool belowos = false
+var int oscount = 0
+belowos := rsi[1] >= os and rsi < os ? true : rsi > os ? false : belowos
+oscount := belowos ? oscount + 1 : not belowos ? 0 : oscount
+var float lastlowestrsi = na
+var float lastlowestprice = na
+var int lastlowestbi = na
+var bool itsfineos = false
+bool maygoup = false
+if belowos[1] and not belowos and nz(oscount[1]) > 0
+    lastlowestrsi := 101
+    lastlowestbi := bar_index
+    itsfineos := true
+    for x = 1 to oscount[1] by 1
+        if x > prd
+            itsfineos := false
+            itsfineos
+        if rsi[x] < lastlowestrsi
+            lastlowestrsi := rsi[x]
+            lastlowestbi := bar_index - x
+            lastlowestprice := low[x]
+            lastlowestprice
+
+if ta.change(lastlowestrsi) != 0 and bool(lastlowestrsi) and bool(lastlowestrsi[1]) and lastlowestrsi > lastlowestrsi[1] and lastlowestprice < lastlowestprice[1] and bar_index - lastlowestbi[1] < maxdis and itsfineos and itsfineos[1] and bar_index - lastlowestbi[1] > mindis
+    line.new(x1 = bar_index, y1 = lastlowestrsi, x2 = lastlowestbi[1], y2 = lastlowestrsi[1], color = bottomcol, width = lwidth, style = line.style_arrow_left)
+    maygoup := true
+    maygoup
+
+var bool aboveob = false
+var int obcount = 0
+aboveob := rsi[1] <= ob and rsi > ob ? true : rsi < ob ? false : aboveob
+obcount := aboveob ? obcount + 1 : not aboveob ? 0 : obcount
+var float lasthighestrsi = na
+var float lasthighestprice = na
+var int lasthighestbi = na
+var bool itsfineob = false
+bool maygodown = false
+if aboveob[1] and not aboveob and nz(obcount[1]) > 0
+    lasthighestrsi := -1
+    lasthighestbi := bar_index
+    itsfineob := true
+    for x = 1 to obcount[1] by 1
+        if x > prd
+            itsfineob := false
+            itsfineob
+        if rsi[x] > lasthighestrsi
+            lasthighestrsi := rsi[x]
+            lasthighestbi := bar_index - x
+            lasthighestprice := high[x]
+            lasthighestprice
+
+if ta.change(lasthighestrsi) != 0 and bool(lasthighestrsi) and bool(lasthighestrsi[1]) and lasthighestrsi < lasthighestrsi[1] and lasthighestprice > lasthighestprice[1] and bar_index - lasthighestbi[1] < maxdis and itsfineob and itsfineob[1] and bar_index - lasthighestbi[1] > mindis
+    line.new(x1 = bar_index, y1 = lasthighestrsi, x2 = lasthighestbi[1], y2 = lasthighestrsi[1], color = topcol, width = lwidth, style = line.style_arrow_left)
+    maygodown := true
+    maygodown
+
+iff_1 = maygodown ? color.black : na
+iff_2 = maygoup ? color.blue : iff_1
+barcolor(color = chbarcol ? iff_2 : na)
