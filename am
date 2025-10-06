@@ -1,0 +1,48 @@
+//@version=5
+
+indicator('__xoxo__copy', shorttitle='__xoxo__', overlay=true, max_lines_count=500, max_labels_count=500, max_bars_back=4999 )
+
+////////////////////////////////
+//
+//Moving avergae
+//
+//////////////////////////////////
+
+
+short002 = ta.sma(close, 2) 
+short007 = ta.sma(close, 7) 
+short21 = ta.sma(close, 14)
+short50 = ta.sma(close, 50)
+long100 = ta.sma(close, 100)
+long200 = ta.sma(close, 200)
+long350 = ta.sma(close, 350)
+long500 = ta.sma(close, 500)
+plot(short002, color=color.new(#0097a7, 59), title='SMA_02')
+plot(short007, color=color.new(#00bc0e, 59), title='SMA_07')
+plot(short21, color=color.new(#ffeb3b, 59), title='SMA_21')
+plot(short50, color=color.new(#ffffff, 59), title='SMA_50')
+plot(long100, color=color.new(#f57c00, 59), title='SMA_100', linewidth=2)
+plot(long200, color=#ff00ea, title=' SMA_200', linewidth=3)
+plot(long350, color=#ff2b2b, title=' SMA_350', linewidth=2)
+plot(long500, color=#0088ff, title=' SMA_500', linewidth=3)
+
+
+///////////////////////////////////////////////////////////////
+//
+//                Auto_Fib
+//
+//////////////////////////////////////////////////////////////
+
+
+fiblength = input(1000)
+maxr = ta.highest(close, fiblength)
+minr = ta.lowest(close, fiblength)
+ranr = maxr - minr
+
+ON = plot(maxr, color=#ffffff, title="1")
+SS = plot(maxr - 0.236 * ranr, title="Fibo__0.764", color=color.new(#1848cc, 71), linewidth=2)
+SO = plot(maxr - 0.382 * ranr, title="Fibo__0.618",  color=color.new(#1848cc, 79), linewidth=2)
+FI = plot(maxr - 0.50 * ranr, title="Fibo__0.5",  color=color.new(#1b5e20, 1), linewidth=3)
+TE = plot(minr + 0.382 * ranr, title="Fibo__0.382", color=color.new(#2962ff, 73), linewidth=2)
+TT = plot(minr + 0.236 * ranr, title="Fibo__0.236", color=color.new(#f06292, 30), linewidth=2)
+ZZ = plot(minr, title="0", color=#ff0000fc, linewidth=1)
